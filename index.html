@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GEORING EVAC v5.0 ULTRA - Command Core FIGAE-UNFV</title>
+  
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- jsPDF Core library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <!-- Styles CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- COMPUERTAS HUD -->
+  <div id="intro-splash">
+    <div class="splash-gate gate-left">
+      <div class="gate-grid"></div>
+      <div class="gate-warning-stripe"></div>
+    </div>
+    <div class="splash-gate gate-right">
+      <div class="gate-grid"></div>
+      <div class="gate-warning-stripe"></div>
+    </div>
+
+    <div class="splash-content">
+      <div class="splash-logo-wrapper">
+        <img src="LOGO.jpg" alt="GeoRing EVAC Logo" class="official-logo-img">
+        <div class="splash-radar-ring"></div>
+        <div class="splash-radar-ring outer"></div>
+      </div>
+      
+      <h1 class="splash-title">GEORING <span>EVAC</span></h1>
+      <p class="splash-subtitle">FACULTAD DE INGENIERÍA GEOGRÁFICA, AMBIENTAL Y ECOTURISMO</p>
+      <div class="splash-unfv-tag"><i class="fa-solid fa-graduation-cap"></i> UNFV - TACTICAL CORE PRO MAX</div>
+
+      <div class="splash-loader-box">
+        <div class="splash-progress-bar" id="splash-bar"></div>
+      </div>
+      <div class="splash-status-text" id="splash-status">INICIALIZANDO MOTOR GEOFÍSICO SÍSMICO...</div>
+    </div>
+  </div>
+
+  <!-- LAYOUT PRINCIPAL -->
+  <div id="app-container">
+    
+    <!-- HEADER HUD -->
+    <header class="hud-header">
+      <div class="header-brand">
+        <div class="brand-logo">
+          <img src="LOGO.jpg" alt="Logo" class="header-logo-img">
+        </div>
+        <div class="brand-titles">
+          <h2>GEORING <span>EVAC</span> <span class="version-tag">v5.0 ULTRA</span></h2>
+          <p>FIGAE - UNIVERSIDAD NACIONAL FEDERICO VILLARREAL</p>
+        </div>
+      </div>
+
+      <div class="header-telemetry">
+        <div class="telem-item">
+          <span class="label"><i class="fa-solid fa-satellite"></i> COORDENADAS</span>
+          <span class="val" id="val-coordenadas">EN ESPERA GPS...</span>
+        </div>
+        <div class="telem-item">
+          <span class="label"><i class="fa-solid fa-mountain"></i> ALTITUD COTA</span>
+          <span class="val highlight" id="val-altitud">-- m.s.n.m.</span>
+        </div>
+        <div class="telem-item">
+          <span class="label"><i class="fa-solid fa-bolt"></i> PGA SUELO</span>
+          <span class="val highlight text-cyan" id="val-pga">0.02 Gal</span>
+        </div>
+        <div class="telem-item">
+          <span class="label"><i class="fa-solid fa-stopwatch"></i> EVACUACIÓN</span>
+          <span class="val highlight text-yellow" id="val-tiempo-evac">-- min</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-audio-toggle" class="btn btn-secondary"><i class="fa-solid fa-volume-high"></i> AUDIO ON</button>
+        <button id="btn-gps" class="btn btn-primary"><i class="fa-solid fa-location-crosshairs"></i> FIX GPS</button>
+        <button id="btn-sos" class="btn btn-danger"><i class="fa-solid fa-radiation"></i> SIMULACRO 8.5 Mw</button>
+      </div>
+    </header>
+
+    <!-- CUERPO PRINCIPAL -->
+    <main class="hud-body">
+      
+      <!-- PANEL IZQUIERDO -->
+      <aside class="panel-sidebar left-panel">
+        
+        <div class="tactical-card">
+          <div class="card-header"><i class="fa-solid fa-chart-pie"></i> RIESGO GEOFÍSICO AHP SAATY</div>
+          <div class="card-body">
+            <div id="risk-badge" class="badge-status green">SISTEMA LISTO</div>
+            <div class="risk-bar-container">
+              <div id="risk-bar-fill" class="risk-bar-fill"></div>
+            </div>
+            <div class="risk-details">
+              <div><span>DISTRITO:</span> <b id="val-distrito">--</b></div>
+              <div><span>PROVINCIA:</span> <b id="val-provincia">--</b></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIMULADOR DE INUNDACIÓN TSUNAMI -->
+        <div class="tactical-card">
+          <div class="card-header"><i class="fa-solid fa-water"></i> MODELADOR DE TSUNAMI (ISO-COTA)</div>
+          <div class="card-body">
+            <div class="range-box">
+              <label>ALTURA PROYECTADA OLA: <span id="tsunami-val" class="text-cyan">10m</span></label>
+              <input type="range" id="tsunami-range" min="3" max="30" step="1" value="10">
+            </div>
+            <button id="btn-sim-tsunami" class="btn btn-warning full-width margin-top"><i class="fa-solid fa-water-waves"></i> SIMULAR INUNDACIÓN</button>
+          </div>
+        </div>
+
+        <div class="tactical-card">
+          <div class="card-header"><i class="fa-solid fa-circle-dot"></i> RADIO DE EVACUACIÓN (BUFFER)</div>
+          <div class="card-body">
+            <div class="range-box">
+              <label>RADIO VECTORIAL: <span id="buffer-val">500m</span></label>
+              <input type="range" id="buffer-range" min="100" max="3000" step="50" value="500">
+            </div>
+          </div>
+        </div>
+
+        <div class="tactical-card">
+          <div class="card-header"><i class="fa-solid fa-layer-group"></i> RED DE ESTACIONES Y REFUGIOS</div>
+          <div class="card-body grid-buttons">
+            <button class="btn-poi" onclick="togglePOICategory('salud')"><i class="fa-solid fa-hospital red"></i> SALUD</button>
+            <button class="btn-poi" onclick="togglePOICategory('seguridad')"><i class="fa-solid fa-shield-cat yellow"></i> SEGURIDAD</button>
+            <button class="btn-poi" onclick="togglePOICategory('refugio')"><i class="fa-solid fa-campground blue"></i> REFUGIOS</button>
+            <button class="btn-poi" onclick="togglePOICategory('agua')"><i class="fa-solid fa-faucet-drip cyan"></i> AGUA</button>
+          </div>
+        </div>
+
+        <div class="tactical-card">
+          <div class="card-header"><i class="fa-solid fa-wave-square"></i> SISMÓGRAFO Y MONITOREO</div>
+          <div class="card-body">
+            <canvas id="seismo-canvas" width="300" height="55"></canvas>
+            <div class="sensor-readout">
+              <span>SENSORES P/S:</span>
+              <strong id="sensor-seismic" style="color:#10b981;">0.2 Mw (NORMAL)</strong>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- VISOR MAPA -->
+      <section class="map-viewport">
+        <div id="map"></div>
+
+        <!-- NOTIFICACIÓN TÁCTICA SOBRE MAPA -->
+        <div id="map-instruction-banner" class="map-banner hidden">
+          <i class="fa-solid fa-crosshairs fa-spin"></i> HAGA CLIC EN EL MAPA PARA SITUAR EL OBSTÁCULO DE EMERGENCIA
+        </div>
+
+        <!-- HERRAMIENTAS RÁPIDAS SOBRE EL MAPA -->
+        <div class="map-quick-tools">
+          <button id="btn-reportar-incidente" class="tool-btn danger-tool" title="Reportar Obstáculo / Colapso"><i class="fa-solid fa-triangle-exclamation"></i></button>
+          <button id="btn-clear-map" class="tool-btn" title="Limpiar Dibujos"><i class="fa-solid fa-trash-can"></i></button>
+        </div>
+
+        <div class="layer-selector">
+          <div class="layer-thumb active" data-layer="street"><i class="fa-solid fa-map"></i> CALLES</div>
+          <div class="layer-thumb" data-layer="sat"><i class="fa-solid fa-satellite-dish"></i> SATÉLITE</div>
+          <div class="layer-thumb" data-layer="topo"><i class="fa-solid fa-mountain-sun"></i> TOPOG.</div>
+        </div>
+      </section>
+
+      <!-- PANEL DERECHO -->
+      <aside class="panel-sidebar right-panel">
+        
+        <div class="tactical-card">
+          <div class="card-header"><i class="fa-solid fa-wind"></i> TELEMETRÍA AMBIENTAL</div>
+          <div class="card-body sensor-grid">
+            <div class="sensor-item">
+              <i class="fa-solid fa-wind"></i>
+              <div>
+                <span>VIENTO:</span>
+                <strong id="sensor-wind">-- km/h</strong>
+              </div>
+            </div>
+            <div class="sensor-item">
+              <i class="fa-solid fa-temperature-half"></i>
+              <div>
+                <span>TEMP. AIRE:</span>
+                <strong id="sensor-temp" style="color:#38bdf8;">-- °C</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- IA ASSIST TÁCTICA INTERACTIVA -->
+        <div class="tactical-card flex-grow">
+          <div class="card-header"><i class="fa-solid fa-robot"></i> GEORING TACTICAL AI ASSIST</div>
+          <div class="card-body ai-chat-container">
+            <div id="chat-messages" class="ai-messages-list">
+              <div class="ai-msg bot">
+                <div class="avatar"><i class="fa-solid fa-brain"></i></div>
+                <div class="bubble">Hola, Comandante. Soy la IA de soporte de GeoRing. ¿Qué acción operativa requiere ejecutar?</div>
+              </div>
+            </div>
+
+            <!-- BOTONES RÁPIDOS DE INTERACCIÓN -->
+            <div class="quick-ai-actions">
+              <button onclick="sendQuickAiCmd('Ruta Óptima')"><i class="fa-solid fa-route"></i> Ruta Refugio</button>
+              <button onclick="sendQuickAiCmd('Evaluar Riesgo')"><i class="fa-solid fa-shield-halved"></i> Evaluar Cota</button>
+              <button onclick="sendQuickAiCmd('Simular Sismo')"><i class="fa-solid fa-volcano"></i> Simular 8.5Mw</button>
+            </div>
+
+            <form id="chat-form" class="ai-input-box">
+              <input type="text" id="chat-input" placeholder="Consulte a la IA o ingrese comandos..." autocomplete="off">
+              <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
+            </form>
+          </div>
+        </div>
+
+        <div class="tactical-card">
+          <div class="card-header"><i class="fa-solid fa-file-export"></i> INFORMES Y EXPORTACIÓN SIG</div>
+          <div class="card-body stack-buttons">
+            <button id="btn-export-pdf" class="btn btn-primary"><i class="fa-solid fa-file-pdf"></i> GENERAR INFORME PDF OFICIAL</button>
+            <button id="btn-export-geojson" class="btn btn-secondary"><i class="fa-solid fa-download"></i> EXPORTAR CAPA SIG (GEOJSON)</button>
+          </div>
+        </div>
+
+      </aside>
+
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
